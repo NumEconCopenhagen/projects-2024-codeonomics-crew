@@ -1,8 +1,8 @@
-# \[Group name\]
+# \[Codeonomics Crew\]
 
 **Group members:**
-- A
-- B
+- Rasmus Strøbæk
+- Sophie Buhn
 - C
 
 This repository contains  
