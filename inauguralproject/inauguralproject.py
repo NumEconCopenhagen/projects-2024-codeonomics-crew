@@ -29,6 +29,9 @@ class ExchangeEconomyClass:
         
 
         """
+
+        par = self.par 
+        
         u_A = x1A**(par.alpha) * x2A**(1-par.alpha)
         return u_A
 
@@ -37,6 +40,8 @@ class ExchangeEconomyClass:
         """
         
         """
+
+        par = self.par 
 
         u_B = x1B**par.beta * x2B**(1-par.beta)
         return u_B
