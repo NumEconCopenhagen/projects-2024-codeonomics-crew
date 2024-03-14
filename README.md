@@ -2,7 +2,7 @@
 
 **Group members:**
 - Rasmus Strøbæk
-- Sophie Buhn
+- Sophie Bune
 
 This repository contains  
 1. Inaugural project. 
