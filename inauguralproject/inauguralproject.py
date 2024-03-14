@@ -1,5 +1,6 @@
 
 from types import SimpleNamespace
+import numpy as np
 
 class ExchangeEconomyClass:
 
@@ -17,6 +18,8 @@ class ExchangeEconomyClass:
 
         par.w1B = 1 - par.w1A   #Consumer B endownment normalisation 
         par.w2B = 1 - par.w2A   #Consumer B endownment normalisation
+
+        par.p2 = 1
 
     def utility_A(self,x1A,x2A):
         """Defines the utility for consumer A
@@ -50,9 +53,14 @@ class ExchangeEconomyClass:
         """
         
         """
+        par = self.par
 
-        x1A = par.alpha*(p1*par.w1A+p2*par.w2A)/p1      #Demand for good 1
-        x2A = (1-par.alpha)*(p1*par.w1A+p2*par.w2A)/1   #Demand for good 2
+        x1A = par.alpha*(p1*par.w1A+par.p2*par.w2A)/p1      #Demand for good 1
+        x2A = (1-par.alpha)*(p1*par.w1A+par.p2*par.w2A)/1   #Demand for good 2
+
+        # xA = []
+
+        # xA.append(np.array([x1A,x2A]))
 
         return x1A, x2A
 
@@ -61,8 +69,14 @@ class ExchangeEconomyClass:
         
         """
 
-        x1B = par.beta*(p1*par.w1B+p2*par.w2B)/p1      #Demand for good 1
-        x2A = (1-par.beta)*(p1*par.w1B+p2*par.w2B)/1   #Demand for good 2
+        par = self.par
+
+        x1B = par.beta*(p1*par.w1B+par.p2*par.w2B)/p1           #Demand for good 1
+        x2B = (1-par.beta)*(p1*par.w1B+par.p2*par.w2B)/par.p2   #Demand for good 2
+
+        # xB = []
+
+        # xB.append(np.array([x1B,x2B]))
 
         return x1B, x2B
 
