@@ -25,11 +25,11 @@ class ExchangeEconomyClass:
         """Defines the utility for consumer A
         
         Args:
-            self: Parameters
             x1A: Number of good 1
             x2A: Number of good 2
 
-        
+        Returns:
+            u_A: Utility of consumer A        
 
         """
 
@@ -40,8 +40,15 @@ class ExchangeEconomyClass:
 
 
     def utility_B(self,x1B,x2B):
-        """
+        """Defines the utility for consumer B
         
+        Args:
+            x1B: Number of good 1
+            x2B: Number of good 2
+
+        Returns:
+            u_B: Utility of consumer B        
+
         """
 
         par = self.par 
@@ -50,7 +57,14 @@ class ExchangeEconomyClass:
         return u_B
 
     def demand_A(self,p1):
-        """
+        """Defines demand for consumer A
+
+        Args:
+            p1: Price of good 1
+        
+        Returns:
+            x1A: Consumer A's demand for good 1
+            x2A: Consumer A's demand for good 2
         
         """
         par = self.par
@@ -58,14 +72,18 @@ class ExchangeEconomyClass:
         x1A = par.alpha*(p1*par.w1A+par.p2*par.w2A)/p1      #Demand for good 1
         x2A = (1-par.alpha)*(p1*par.w1A+par.p2*par.w2A)/1   #Demand for good 2
 
-        # xA = []
-
-        # xA.append(np.array([x1A,x2A]))
-
+    
         return x1A, x2A
 
     def demand_B(self,p1):
-        """
+        """Defines demand for consumer B
+
+        Args:
+            p1: Price of good 1
+        
+        Returns:
+            x1B: Consumer B's demand for good 1
+            x2B: Consumer B's demand for good 2
         
         """
 
@@ -81,6 +99,13 @@ class ExchangeEconomyClass:
         return x1B, x2B
 
     def check_market_clearing(self,p1):
+        """Checks if the market clears
+
+        Args:
+            p1: Price of good 1
+        
+        """
+
 
         par = self.par
 
