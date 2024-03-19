@@ -5,6 +5,7 @@ import numpy as np
 class ExchangeEconomyClass:
 
     def __init__(self):
+        """Initialize the model with parameters"""
 
         par = self.par = SimpleNamespace()
 
@@ -20,6 +21,11 @@ class ExchangeEconomyClass:
         par.w2B = 1 - par.w2A   #Consumer B endownment normalisation
 
         par.p2 = 1
+
+        # Equilibrium parameters
+        par.kappa = 0.1
+        par.eps = 1e-8
+        par.maxiter = 10000
 
     def utility_A(self,x1A,x2A):
         """Defines the utility for consumer A
@@ -116,3 +122,130 @@ class ExchangeEconomyClass:
         eps2 = x2A-par.w2A + x2B-(1-par.w2A)
 
         return eps1,eps2
+    
+    def excess_demand_good_1_func(self,p1):
+        """Calculates the excess demand for good 1
+
+        Args:
+            p1: Price of good 1
+
+        Returns:
+            excess_demand: Excess demand of good 1
+        """
+        par = self.par
+
+        # 1. demand
+        x1A, _ = self.demand_A(p1)
+        x1B, _ = self.demand_B(p1)
+        demand = x1A + x1B
+
+        # 2. supply
+        supply = par.w1A + par.w1B
+
+        # 3. excess demand
+        excess_demand = demand - supply
+
+        return excess_demand
+    
+    def excess_demand_good_2_func(self, p1):
+        """Calculates the excess demand  for good 2
+
+        Args:
+            p1: Price of good 1
+
+        Returns:
+            excess_demand: Excess demand of good 2 
+        """
+        par = self.par
+
+        # 1. demand
+        _ , x2A = self.demand_A(p1)
+        _ , x2B = self.demand_B(p1)
+        demand = x2A + x2B
+
+        # 2. supply 
+        supply = par.w2A + par.w2B
+
+        # 3. excess demand
+        excess_demand = demand-supply
+        
+        return excess_demand
+
+
+
+    def find_equilibrium(self, p2, p1_guess):
+        """Calculates the market equilibrium
+
+        Args:
+            p1_guess: Arbitrary starting value of price for good 1
+
+        Returns:
+             Iteration over excess demand based on the price of good 1
+        """
+        par = self.par
+
+        # Counter:
+        t = 0
+        # Guess on price
+        p1 = p1_guess
+
+        
+        # using a while loop as we don't know number of iterations a priori
+        while True:
+
+            # 1. excess demand
+            Z1 = self.excess_demand_good_1_func(p1)
+            
+            # 2. check stop?
+            if  np.abs(Z1) < par.eps or t >= par.maxiter:
+                print(f'{t:3d}: p1 = {p1:12.8f} -> excess demand -> {Z1:14.8f}')
+                break    
+            
+            # 3. Print the first 5 and every 25th iteration using the modulus operator 
+            if t < 5 or t%25 == 0:
+                print(f'{t:3d}: p1 = {p1:12.8f} -> excess demand -> {Z1:14.8f}')
+            elif t == 5:
+                print('   ...')
+            
+            # 4. update p1
+            p1 = p1 + par.kappa*Z1/2
+            
+            # 5. update counter and return to step 1
+            t += 1    
+
+
+        # Check if solution is found 
+        if np.abs(Z1) < par.eps:
+            # Store equilibrium prices
+            self.p1_star = p1 
+
+            # Store equilibrium excess demand 
+            self.Z1 = Z1
+            self.Z2 = self.excess_demand_good_2_func(self.p1_star)
+
+            # Make sure that Walras' law is satisfied
+            if not np.abs(self.Z2) < par.eps:
+                print('The market for good 2 was not cleared')
+                print(f'Z2 = {self.Z2}')
+
+        else:
+            print('Solution was not found')
+
+
+    def print_solution(self):
+        """Prints the solution to exchange economy
+        
+        Args:
+            No arguments
+        
+        Returns:
+            Returns solutions to the exchange economy
+        """
+
+        text = 'Solution to market equilibrium:\n'
+        text += f'p1 = {self.p1_star}\n\n'
+
+        text += 'Excess demands are:\n'
+        text += f'Z1 = {self.Z1}\n'
+        text += f'Z2 = {self.Z2}'
+        print(text)
