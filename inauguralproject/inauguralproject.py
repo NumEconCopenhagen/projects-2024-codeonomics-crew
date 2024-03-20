@@ -249,5 +249,3 @@ class ExchangeEconomyClass:
         text += f'Z1 = {self.Z1}\n'
         text += f'Z2 = {self.Z2}'
         print(text)
-    
-    
