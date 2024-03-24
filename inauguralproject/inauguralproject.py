@@ -20,6 +20,7 @@ class ExchangeEconomyClass:
         par.w1B = 1 - par.w1A   #Consumer B endownment normalisation 
         par.w2B = 1 - par.w2A   #Consumer B endownment normalisation
 
+        # Price normalisation
         par.p2 = 1
 
         # Equilibrium parameters
@@ -148,7 +149,7 @@ class ExchangeEconomyClass:
         return excess_demand
     
     def excess_demand_good_2_func(self, p1):
-        """Calculates the excess demand  for good 2
+        """Calculates the excess demand for good 2
 
         Args:
             p1: Price of good 1
@@ -193,11 +194,11 @@ class ExchangeEconomyClass:
         # using a while loop as we don't know number of iterations a priori
         while True:
 
-            # 1. excess demand
+            # 1. excess demand for good 1
             Z1 = self.excess_demand_good_1_func(p1)
             
             # 2. check stop?
-            if  np.abs(Z1) < par.eps or t >= par.maxiter:
+            if  np.abs(Z1) < par.eps or t >= par.maxiter:   # The first condition compares to the tolerance level and the second condition ensures that the loop does not go to infinity
                 print(f'{t:3d}: p1 = {p1:12.8f} -> excess demand -> {Z1:14.8f}')
                 break    
             
@@ -208,7 +209,7 @@ class ExchangeEconomyClass:
                 print('   ...')
             
             # 4. update p1
-            p1 = p1 + par.kappa*Z1/2
+            p1 = p1 + par.kappa*Z1/2    # The price is updated by a small number (kappe) scaled to excess demand divded among the number of consumers, i.e. 2
             
             # 5. update counter and return to step 1
             t += 1    
