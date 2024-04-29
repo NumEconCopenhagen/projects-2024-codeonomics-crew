@@ -11,4 +11,5 @@ We apply the **following datasets**:
 
 **Dependencies:** Apart from a standard Anaconda Python 3 installation, the project requires the following installations:
 
-``pip install plotly``
+``pip install plotly==5.20.0``
+Also note, that the plots requires an extension for Jupyter notebook called 'Notebook Renderers' which can be installed through VScode.
