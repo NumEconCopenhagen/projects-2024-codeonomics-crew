@@ -5,6 +5,6 @@
 - Sophie Bune
 
 This repository contains  
-1. Inaugural project. 
-2. Data project. We fetch data from **source x** on **y** and show that ...
+1. [Inaugural project](inauguralproject); We solve the Edgeworth economy as presented in the assignment. 
+2. [Data project](dataproject); We fetch data from **Goddard Instittute of Space** on **temperature data** and **The World Bank** on **GDP** and show that there is an effect of GDP on global increases in temperature.
 3. Model project. We model ...
