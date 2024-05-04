@@ -73,7 +73,8 @@ class Solow:
             None
         """
 
-        par = self.par = SimpleNamespace()
+        self.par = SimpleNamespace()    # Parameters
+        self.sim = SimpleNamespace()    # Simulation results
 
     def setup(self):
         """
@@ -206,13 +207,127 @@ class Solow:
         return result
 
 
+    def graph(self, periods = 100, ext1 = False, ext2 = False, do_print = False, shock_period = 0, shock_size = 0):
+        """
+        Graph the model
 
+        Args:
+            periods: Number of periods to simulate
+            ext1: If True, the model is solved with land
+            ext2: If True, the model is solved with land AND oil
+            do_print: If True, the solution is printed
+            shock_period: Period of shock (set to 0 as default)
+            shock_size: Amount of capital destroyed (set to 0 as default)
+        
+        Returns:
+            if do_print is True, the solution is printed
+        """
+        par = self.par  # Parameters
+        sim = self.sim  # Simulation results
+        T = periods
 
+        # Define extensions
+        if ext1 == True:
+            kappa = par.kappa
+            epsilon = 0
+        elif ext2 == True:
+            kappa = par.kappa
+            epsilon = par.epsilon
+        else:
+            kappa = 0
+            epsilon = 0
+        
+        # Check shock is within maximum amount of periods
+        if shock_period < 0:
+            raise ValueError('Shock period must be positive')
+        if shock_period > T:
+            shock_period = 0
+            shock_size = 0
 
+        # Find steady state
+        ss = self.solve_ss(method='brentq', ext1=ext1, ext2=ext2).root
 
+        
+        if ss < 0:
+            message = 'The steady state is negative'
+        else:
+            message = '...'
 
+        # Create empty arrays to store results
+        sim.K = np.empty(T+1)
+        sim.L = np.empty(T+1)
+        sim.A = np.empty(T+1)
+        sim.R = np.empty(T+1)
+        sim.Y = np.empty(T+1)
+        sim.E = np.empty(T+1)
+        sim.z = np.empty(T+1)
+        sim.t = np.linspace(0, T+1, T+1)
 
+        # Initial values
+        sim.K[0] = par.K0
+        sim.L[0] = par.L0
+        sim.A[0] = par.A0
+        sim.R[0] = par.R0
+        sim.Y[0] = sim.K[0]**par.alpha * (sim.A[0]*sim.L[0])**(1-par.alpha) * par.X**kappa * sim.E[0]**epsilon
+        sim.E[0] = par.s_E * sim.R[0]
+        sim.z[0] = sim.K[0]/sim.Y[0]
 
+        # Simulate up till shock
+        for t in range(shock_period):
+            sim.K[t+1] = par.s_Y * sim.Y[t] + (1-par.delta)*sim.K[t]
+            sim.L[t+1] = (1+par.n)*sim.L[t]
+            sim.A[t+1] = (1+par.g)*sim.A[t]
+            sim.R[t+1] = (1-par.s_E)*sim.R[t]
+            sim.E[t+1] = par.s_E * sim.R[t+1]
+            sim.Y[t+1] = sim.K[t+1]**par.alpha * (sim.A[t+1]*sim.L[t+1])**(1-par.alpha) * par.X**kappa * sim.E[t+1]**epsilon 
+            sim.z[t+1] = sim.K[t+1]/sim.Y[t+1]
+        
+        # Store shock
+        sim.K[shock_period] = sim.K[shock_period]*(1-shock_size)
+        
+
+        # Simulate remaining periods
+        for t in range(shock_period, T):
+            sim.K[t+1] = par.s_Y * sim.Y[t] + (1-par.delta)*sim.K[t]
+            sim.L[t+1] = (1+par.n)*sim.L[t]
+            sim.A[t+1] = (1+par.g)*sim.A[t]
+            sim.R[t+1] = (1-par.s_E)*sim.R[t]
+            sim.E[t+1] = par.s_E * sim.R[t+1]
+            sim.Y[t+1] = sim.K[t+1]**par.alpha * (sim.A[t+1]*sim.L[t+1])**(1-par.alpha) * par.X**kappa * sim.E[t+1]**epsilon 
+            sim.z[t+1] = sim.K[t+1]/sim.Y[t+1]
+
+        # Plot
+        if do_print == True:    # Start plotting
+            if ext1 == True:    # For model with land
+                fig, ax = plt.subplots(2, 3)    # Create figure with 2 rows and 3 columns
+                fig.suptitle(f'Simulated model with land{message}', size = 20)   # Title of figure
+                ax[0,2].plot(sim.t,par.X*np.ones(T+1))   # Plot fixed resources on row 0, column 2
+                ax[0,2].set_title('Land, $X$')  # Title of subplot
+            elif ext2 == True:   # For model with land and oil
+                fig, ax = plt.subplots(2, 3)   # Create figure with 2 rows and 3 columns
+                fig.suptitle(f'Simulated model with land and oil{message}', size = 20)  # Title of figure
+                ax[0,2].plot(sim.t,sim.R)  # Plot exhaustible resource on row 0, column 2
+                ax[0,2].set_title('Stock of oil, $R_t$') # Title of subplot
+                ax[1,2].plot(sim.t,sim.E) # Plot consumption of exhaustible resource on row 1, column 2
+                ax[1,2].set_title('Consumption of limited resource, $E_t$') # Title of subplot
+            else:  # For model without land or oil
+                fig, ax = plt.subplots(2, 2) # Create figure with 2 rows and 2 columns
+                fig.suptitle(f'Simulated model without land or oil{message}', size = 20)  # Title of figure
+                fig.suptitle(f'Simulated model{message}', size = 20) # Title of figure
+            ax[0,0].plot(sim.t,sim.K) # Plot capital on row 0, column 0
+            ax[0,0].set_title('Capital stock, $K_t$') # Title of subplot
+            ax[1,0].plot(sim.t,sim.Y) # Plot output on row 1, column 0
+            ax[1,0].set_title('Output, $Y_t$') # Title of subplot
+            ax[0,1].plot(sim.t,sim.z, label=r'$z_t$') # Plot capital-output ratio on row 0, column 1
+            ax[0,1].axhline(y=ss, color='black', linestyle='--', label=f'Steady state: {ss:.2f}') # Add horizontal line for steady state
+            ax[0,1].legend() # Add legend to subplot 
+            ax[0,1].set_title('Capital-output ratio, $z_t$')    # Title of subplot
+            ax[1,1].plot(sim.t,sim.A, label=r'$A_t$') # Plot technology on row 1, column 1
+            ax[1,1].plot(sim.t,sim.L, label=r'$L_t$') # Plot labor on row 1, column 1
+            ax[1,1].legend() # Add legend to subplot
+            ax[1,1].set_title('Technology and Labour, $A_t$ and $L_t$') # Title of subplot
+            plt.subplots_adjust(wspace=0.2, hspace=0.4) # Adjust space between subplots
+            plt.show() # Show plot
 
 
 
