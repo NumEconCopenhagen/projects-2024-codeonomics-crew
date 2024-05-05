@@ -90,14 +90,14 @@ class Solow:
         par = self.par
 
         # Parameters for production function
-        par.alpha = 0.2    # Capital share
+        par.alpha = 1/3    # Capital share
         par.kappa = 0.15    # Land share
         par.epsilon = 0.15 # Oil share
 
         par.g = 0.02        # Growth rate of technology
-        par.s_E = 0.1       # Extraction rate of oil
+        par.s_E = 0.01       # Extraction rate of oil
         par.n = 0.01        # Growth rate of labor
-        par.s_Y = 0.2       # Savings rate
+        par.s_Y = 0.1       # Savings rate
         par.delta = 0.05    # Depreciation rate of capital
 
         # Initial values
@@ -237,7 +237,7 @@ class Solow:
             kappa = 0
             epsilon = 0
         
-        # Check shock is within maximum amount of periods
+        # Check shock is within maximum amount of periods and not negative
         if shock_period < 0:
             raise ValueError('Shock period must be positive')
         if shock_period > T:
@@ -251,21 +251,21 @@ class Solow:
         if ss < 0:
             message = 'The steady state is negative'
         else:
-            message = '...'
+            message = ''
 
         # Create empty arrays to store results
-        sim.K = np.empty(T+1)
-        sim.L = np.empty(T+1)
-        sim.A = np.empty(T+1)
-        sim.R = np.empty(T+1)
-        sim.Y = np.empty(T+1)
-        sim.E = np.empty(T+1)
-        sim.z = np.empty(T+1)
-        sim.t = np.linspace(0, T+1, T+1)
+        sim.K = np.empty(T+1)   # Capital
+        sim.L = np.empty(T+1)   # Labor
+        sim.A = np.empty(T+1)   # Technology
+        sim.R = np.empty(T+1)   # Oil
+        sim.Y = np.empty(T+1)   # Output
+        sim.E = np.empty(T+1)   # Consumption of oil
+        sim.z = np.empty(T+1)   # Capital-output ratio
+        sim.t = np.linspace(0, T+1, T+1)    # Time
 
         # Initial values
-        sim.K[0] = par.K0
-        sim.L[0] = par.L0
+        sim.K[0] = par.K0 
+        sim.L[0] = par.L0   
         sim.A[0] = par.A0
         sim.R[0] = par.R0
         sim.Y[0] = sim.K[0]**par.alpha * (sim.A[0]*sim.L[0])**(1-par.alpha) * par.X**kappa * sim.E[0]**epsilon
@@ -275,15 +275,15 @@ class Solow:
         # Simulate up till shock
         for t in range(shock_period):
             sim.K[t+1] = par.s_Y * sim.Y[t] + (1-par.delta)*sim.K[t]
+            sim.R[t+1] = (1-par.s_E)*sim.R[t]
             sim.L[t+1] = (1+par.n)*sim.L[t]
             sim.A[t+1] = (1+par.g)*sim.A[t]
-            sim.R[t+1] = (1-par.s_E)*sim.R[t]
             sim.E[t+1] = par.s_E * sim.R[t+1]
             sim.Y[t+1] = sim.K[t+1]**par.alpha * (sim.A[t+1]*sim.L[t+1])**(1-par.alpha) * par.X**kappa * sim.E[t+1]**epsilon 
             sim.z[t+1] = sim.K[t+1]/sim.Y[t+1]
         
         # Store shock
-        sim.K[shock_period] = sim.K[shock_period]*(1-shock_size)
+        sim.K[shock_period] = sim.K[shock_period]*(1-shock_size)    # Shock is relative amout of capital destroyed, and thus we subtract it from 1
         
 
         # Simulate remaining periods
