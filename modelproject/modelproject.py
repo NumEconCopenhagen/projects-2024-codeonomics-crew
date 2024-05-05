@@ -6,13 +6,12 @@ from IPython.display import display
 import matplotlib.pyplot as plt
 
 
-def analytical(ext1 = False, ext2 = False, do_print = False):
+def analytical(ext = 0, do_print = False):
     """
     Use sympy to solve the model.
 
     Args:
-        ext1 (bool): If True, the model is solved with land.
-        ext2 (bool): If True, the model is solved with land AND oil
+        ext: The extension of the model. 0 is the basic model, 1 is the model with land, and 2 is the model with land and oil.
         do_print (bool): If True, the solution is printed.
     
     Returns:
@@ -30,12 +29,10 @@ def analytical(ext1 = False, ext2 = False, do_print = False):
     # Define extensions
     kappa = 0
     epsilon = 0
-
-
-    if ext1:
+    if ext == 1:
         kappa = sm.symbols('kappa')
         epsilon = 0
-    elif ext2:
+    elif ext == 2:
         kappa = sm.symbols('kappa')
         epsilon = sm.symbols('epsilon')
 
@@ -48,9 +45,9 @@ def analytical(ext1 = False, ext2 = False, do_print = False):
 
     # Print solution
     if do_print == True:
-        if ext1 == True:
+        if ext == 1:
             print(f'The solution to the model with extension 1 is: z = {z_sol}')
-        elif ext2 == True:
+        elif ext == 2:
             print(f'The solution to the model with extension 2 is: z = {z_sol}')
         else:
             print(f'The solution to the model without any extensions is: z = {z_sol}')
@@ -110,12 +107,13 @@ class Solow:
         par.X = 100         # Fixed land
 
 
-    def evaluate_ss(self, ss, ext1 = False, ext2 = False, do_print = False):
+    def evaluate_ss(self, ss, ext = 0, do_print = False):
         """
         Evaluate the analycally derivated steady state
 
         Args:
             ss: Analytical steady state
+            ext: The extension of the model. 0 is the basic model, 1 is the model with land, and 2 is the model with land and oil.
             do_print: If True, the steady state is printed
         
         Returns:
@@ -128,10 +126,10 @@ class Solow:
 
 
         # Define extensions
-        if ext1 == True:
+        if ext == 1:
             kappa = sm.symbols('kappa')
             epsilon = 0
-        elif ext2 == True:
+        elif ext == 2:
             kappa = sm.symbols('kappa')
             epsilon = sm.symbols('epsilon')
         
@@ -160,14 +158,13 @@ class Solow:
 
 
 
-    def solve_ss(self, method='brentq', ext = 0, ext2= False, do_print = False):
+    def solve_ss(self, method='brentq', ext = 0, do_print = False):
         """
         Solve the model numerically
 
         Args:
             method: Method for solving the model - either bisect or brentq
-            ext1: If True, the model is solved with land
-            ext2: If True, the model is solved with land AND oil
+            ext: The extension of the model. 0 is the basic model, 1 is the model with land, and 2 is the model with land and oil.
             do_print: If True, the solution is printed
         
         Returns:
@@ -213,8 +210,7 @@ class Solow:
 
         Args:
             periods: Number of periods to simulate
-            ext1: If True, the model is solved with land
-            ext2: If True, the model is solved with land AND oil
+            ext: The extension of the model. 0 is the basic model, 1 is the model with land, and 2 is the model with land and oil.
             do_print: If True, the solution is printed
             shock_period: Period of shock (set to 0 as default)
             shock_size: Amount of capital destroyed (set to 0 as default)
