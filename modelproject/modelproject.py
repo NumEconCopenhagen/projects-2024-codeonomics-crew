@@ -160,7 +160,7 @@ class Solow:
 
 
 
-    def solve_ss(self, method='brentq', ext1 = False, ext2= False, do_print = False):
+    def solve_ss(self, method='brentq', ext = 0, ext2= False, do_print = False):
         """
         Solve the model numerically
 
@@ -177,10 +177,10 @@ class Solow:
         par = self.par  # Parameters
 
         # Define extensions
-        if ext1 == True:
+        if ext == 1:
             kappa = par.kappa
             epsilon = 0
-        elif ext2 == True:
+        elif ext == 2:
             kappa = par.kappa
             epsilon = par.epsilon
         else:
@@ -207,7 +207,7 @@ class Solow:
         return result
 
 
-    def graph(self, periods = 100, ext1 = False, ext2 = False, do_print = False, shock_period = 0, shock_size = 0):
+    def graph(self, periods = 100, ext = 0, do_print = False, shock_period = 0, shock_size = 0):
         """
         Graph the model
 
@@ -227,10 +227,10 @@ class Solow:
         T = periods
 
         # Define extensions
-        if ext1 == True:
+        if ext == 1:
             kappa = par.kappa
             epsilon = 0
-        elif ext2 == True:
+        elif ext == 2:
             kappa = par.kappa
             epsilon = par.epsilon
         else:
@@ -245,7 +245,7 @@ class Solow:
             shock_size = 0
 
         # Find steady state
-        ss = self.solve_ss(method='brentq', ext1=ext1, ext2=ext2).root
+        ss = self.solve_ss(method='brentq', ext=ext).root
 
         
         if ss < 0:
@@ -279,7 +279,7 @@ class Solow:
             sim.L[t+1] = (1+par.n)*sim.L[t]
             sim.A[t+1] = (1+par.g)*sim.A[t]
             sim.E[t+1] = par.s_E * sim.R[t+1]
-            sim.Y[t+1] = sim.K[t+1]**par.alpha * (sim.A[t+1]*sim.L[t+1])**(1-par.alpha) * par.X**kappa * sim.E[t+1]**epsilon 
+            sim.Y[t+1] = sim.K[t+1]**par.alpha * (sim.A[t+1]*sim.L[t+1])**(1-par.alpha-kappa-epsilon) * par.X**kappa * sim.E[t+1]**epsilon 
             sim.z[t+1] = sim.K[t+1]/sim.Y[t+1]
         
         # Store shock
@@ -293,17 +293,17 @@ class Solow:
             sim.A[t+1] = (1+par.g)*sim.A[t]
             sim.R[t+1] = (1-par.s_E)*sim.R[t]
             sim.E[t+1] = par.s_E * sim.R[t+1]
-            sim.Y[t+1] = sim.K[t+1]**par.alpha * (sim.A[t+1]*sim.L[t+1])**(1-par.alpha) * par.X**kappa * sim.E[t+1]**epsilon 
+            sim.Y[t+1] = sim.K[t+1]**par.alpha * (sim.A[t+1]*sim.L[t+1])**(1-par.alpha-kappa-epsilon) * par.X**kappa * sim.E[t+1]**epsilon 
             sim.z[t+1] = sim.K[t+1]/sim.Y[t+1]
 
         # Plot
         if do_print == True:    # Start plotting
-            if ext1 == True:    # For model with land
+            if ext == 1:    # For model with land
                 fig, ax = plt.subplots(2, 3)    # Create figure with 2 rows and 3 columns
                 fig.suptitle(f'Simulated model with land{message}', size = 20)   # Title of figure
                 ax[0,2].plot(sim.t,par.X*np.ones(T+1))   # Plot fixed resources on row 0, column 2
                 ax[0,2].set_title('Land, $X$')  # Title of subplot
-            elif ext2 == True:   # For model with land and oil
+            elif ext == 2:   # For model with land and oil
                 fig, ax = plt.subplots(2, 3)   # Create figure with 2 rows and 3 columns
                 fig.suptitle(f'Simulated model with land and oil{message}', size = 20)  # Title of figure
                 ax[0,2].plot(sim.t,sim.R)  # Plot exhaustible resource on row 0, column 2
