@@ -6,7 +6,7 @@ from IPython.display import display
 import matplotlib.pyplot as plt
 
 
-def analytical(ext = 0, do_print = False):
+def analytical(ext1 = False, ext2 = False, do_print = False):
     """
     Use sympy to solve the model.
 
@@ -29,10 +29,10 @@ def analytical(ext = 0, do_print = False):
     # Define extensions
     kappa = 0
     epsilon = 0
-    if ext == 1:
+    if ext1:
         kappa = sm.symbols('kappa')
         epsilon = 0
-    elif ext == 2:
+    elif ext2:
         kappa = sm.symbols('kappa')
         epsilon = sm.symbols('epsilon')
 
@@ -45,9 +45,9 @@ def analytical(ext = 0, do_print = False):
 
     # Print solution
     if do_print == True:
-        if ext == 1:
+        if ext1:
             print(f'The solution to the model with extension 1 is: z = {z_sol}')
-        elif ext == 2:
+        elif ext2:
             print(f'The solution to the model with extension 2 is: z = {z_sol}')
         else:
             print(f'The solution to the model without any extensions is: z = {z_sol}')
@@ -107,7 +107,7 @@ class Solow:
         par.X = 100         # Fixed land
 
 
-    def evaluate_ss(self, ss, ext = 0, do_print = False):
+    def evaluate_ss(self, ss, ext1 = False, ext2 = False, do_print = False):
         """
         Evaluate the analycally derivated steady state
 
@@ -126,10 +126,10 @@ class Solow:
 
 
         # Define extensions
-        if ext == 1:
+        if ext1:
             kappa = sm.symbols('kappa')
             epsilon = 0
-        elif ext == 2:
+        elif ext2:
             kappa = sm.symbols('kappa')
             epsilon = sm.symbols('epsilon')
         
@@ -158,7 +158,7 @@ class Solow:
 
 
 
-    def solve_ss(self, method='brentq', ext = 0, do_print = False):
+    def solve_ss(self, method='brentq', ext1 = False, ext2 = False, do_print = False):
         """
         Solve the model numerically
 
@@ -174,10 +174,10 @@ class Solow:
         par = self.par  # Parameters
 
         # Define extensions
-        if ext == 1:
+        if ext1:
             kappa = par.kappa
             epsilon = 0
-        elif ext == 2:
+        elif ext2:
             kappa = par.kappa
             epsilon = par.epsilon
         else:
@@ -204,7 +204,7 @@ class Solow:
         return result
 
 
-    def graph(self, periods = 100, ext = 0, do_print = False, shock_period = 0, shock_size = 0):
+    def graph(self, periods = 100, ext1 = False, ext2 = False, do_print = False, shock_period = 0, shock_size = 0):
         """
         Graph the model
 
@@ -223,10 +223,10 @@ class Solow:
         T = periods
 
         # Define extensions
-        if ext == 1:
+        if ext1:
             kappa = par.kappa
             epsilon = 0
-        elif ext == 2:
+        elif ext2:
             kappa = par.kappa
             epsilon = par.epsilon
         else:
@@ -241,7 +241,7 @@ class Solow:
             shock_size = 0
 
         # Find steady state
-        ss = self.solve_ss(method='brentq', ext=ext).root
+        ss = self.solve_ss(method='brentq', ext1=ext1, ext2=ext2).root
 
         
         if ss < 0:
@@ -264,7 +264,7 @@ class Solow:
         sim.L[0] = par.L0   
         sim.A[0] = par.A0
         sim.R[0] = par.R0
-        sim.Y[0] = sim.K[0]**par.alpha * (sim.A[0]*sim.L[0])**(1-par.alpha) * par.X**kappa * sim.E[0]**epsilon
+        sim.Y[0] = sim.K[0]**par.alpha * (sim.A[0]*sim.L[0])**(1-par.alpha-kappa-epsilon) * par.X**kappa * sim.E[0]**epsilon
         sim.E[0] = par.s_E * sim.R[0]
         sim.z[0] = sim.K[0]/sim.Y[0]
 
@@ -294,12 +294,12 @@ class Solow:
 
         # Plot
         if do_print == True:    # Start plotting
-            if ext == 1:    # For model with land
+            if ext1:    # For model with land
                 fig, ax = plt.subplots(2, 3)    # Create figure with 2 rows and 3 columns
                 fig.suptitle(f'Simulated model with land{message}', size = 20)   # Title of figure
                 ax[0,2].plot(sim.t,par.X*np.ones(T+1))   # Plot fixed resources on row 0, column 2
                 ax[0,2].set_title('Land, $X$')  # Title of subplot
-            elif ext == 2:   # For model with land and oil
+            elif ext2:   # For model with land and oil
                 fig, ax = plt.subplots(2, 3)   # Create figure with 2 rows and 3 columns
                 fig.suptitle(f'Simulated model with land and oil{message}', size = 20)  # Title of figure
                 ax[0,2].plot(sim.t,sim.R)  # Plot exhaustible resource on row 0, column 2
