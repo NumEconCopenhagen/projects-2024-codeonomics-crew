@@ -264,8 +264,8 @@ class Solow:
         sim.L[0] = par.L0   
         sim.A[0] = par.A0
         sim.R[0] = par.R0
-        sim.Y[0] = sim.K[0]**par.alpha * (sim.A[0]*sim.L[0])**(1-par.alpha-kappa-epsilon) * par.X**kappa * sim.E[0]**epsilon
         sim.E[0] = par.s_E * sim.R[0]
+        sim.Y[0] = sim.K[0]**par.alpha * (sim.A[0]*sim.L[0])**(1-par.alpha-kappa-epsilon) * par.X**kappa * sim.E[0]**epsilon
         sim.z[0] = sim.K[0]/sim.Y[0]
 
         # Simulate up till shock
