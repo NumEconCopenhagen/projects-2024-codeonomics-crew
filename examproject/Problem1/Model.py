@@ -8,6 +8,8 @@ class production_economy:
     def __init__(self):
         '''Initialize the model'''
         self.par = SimpleNamespace()
+
+        self.setup()
     
     def setup(self):
         '''Defined parameters'''
@@ -31,6 +33,10 @@ class production_economy:
         # Question 3
         par.kappa = 0.1
 
+        # Prices
+        par.p1 = 2.0
+        par.p2 = 2.0
+
     def market_clearing(self, p1, p2):
         '''Market clearing
         
@@ -51,10 +57,6 @@ class production_economy:
         y1 = production(self.par, p1)
         y2 = production(self.par, p2)
 
-        # Profit for the firms
-        pi1 = profit(self.par, p1)
-        pi2 = profit(self.par, p2)
-
         # Total demand for labor supply
         ell = l1+l2
 
@@ -69,3 +71,6 @@ class production_economy:
             return None
         
         return ell, c1, c2
+    
+    
+        
