@@ -40,6 +40,8 @@ class production_economy:
         Returns:
             Market clearing
         '''
+        print ('Prices of good 1:', p1)
+        print ('Prices of good 2:', p2)
 
         # Labor demanded by the firms
         l1 = labor_demand(self.par, p1)
@@ -60,13 +62,10 @@ class production_economy:
         c1 = demand(self.par, ell, p1, p2)[0]
         c2 = demand(self.par, ell, p1, p2)[1]
 
-        if c1 != y1 or c2 != y2:
-            print('Market for good 1 is not cleared')
-        else:
+        markets_clear = np.isclose(ell - l1 - l2, 0, atol=1e-6) and np.isclose(y1 - c1, 0, atol=1e-6) and np.isclose(y2 - c2, 0, atol=1e-6)
 
-            # Market clearing conditions:
-            labor_market_clearing = ell
-            good1_market_clearing = c1
-            good2_market_clearing = c2
-
-        return labor_market_clearing, good1_market_clearing, good2_market_clearing
+        if markets_clear == False:
+            print('Markets does not clear')
+            return None
+        
+        return ell, c1, c2
