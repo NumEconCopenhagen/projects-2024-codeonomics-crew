@@ -9,25 +9,38 @@ def sim_utility(par):
     np.random.seed(42)          # Set seed
 
     # Arrays to store utilities
-    expected_utility = np.zeros((par.K, par.J))
-    average_realised_utility = np.zeros((par.K, par.J))
-    epsilon_diff = np.zeros((par.K, par.J))
+    expected_utility = np.zeros((par.J))
+    realised_utility = np.zeros((par.K, par.J))
+    epsilon_storage = np.zeros((par.K, par.J))
 
     for k in range(par.K):      # Loop over simulations
+
+        
+
         for j in range(par.J):  # Loop over careers
 
-            # Calculate errors terms (both true and expected)
+            # Calculate errors terms
             epsilon = np.random.normal(0, par.sigma)
-            mean_epsilon = 1/(k+1) * np.sum(epsilon)
+            # Add epsilon to storage
+            epsilon_storage[k, j] = epsilon
 
             # Calculate utility
-            average_realised_utility[k, j] = par.v[j] + epsilon
-            expected_utility[k, j] = par.v[j] + mean_epsilon
-        
-            # Calculate difference between expected and realised error term
-            epsilon_diff[k, j] = epsilon-mean_epsilon
+            realised_utility[k, j] = par.v[j] + epsilon
+            
 
-    return average_realised_utility, expected_utility, epsilon_diff
+    # Calculate mean of the epsilons:
+    mean_epsilon = np.mean(epsilon_storage, axis=0)
+    # Calculate expected utility
+    for j in range(par.J):
+        expected_utility[j] = par.v[j] + mean_epsilon[j]
+    
+    # Calculate average across realised utilities
+    realised_utility_mean = np.mean(realised_utility, axis=0)
+
+    return realised_utility, expected_utility, realised_utility_mean
+
+
+
 
 
 
