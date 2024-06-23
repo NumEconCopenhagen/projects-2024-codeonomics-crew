@@ -146,6 +146,43 @@ def Walras_law(prices, tau, T, par):
 
     return good2_market_clear, labor_market_clear
 
+def market_clearing(par, p1, p2):
+    '''Market clearing
+    
+    Args:
+        p1: price of good 1
+        p2: price of good 2
+    Returns:
+        Market clearing
+    '''
+    print ('Prices of good 1:', p1)
+    print ('Prices of good 2:', p2)
+
+    # Labor demanded by the firms
+    l1 = labor_demand(par, p1)
+    l2 = labor_demand(par, p2)
+
+    # Optimal production by the firms
+    y1 = production(par, p1)
+    y2 = production(par, p2)
+
+    # Labor supply
+    ell = l1+l2
+
+    # Household consumption
+    c1, c2 = demand(par, p1, p2, par.tau, par.T)
+
+    excess_demand = np.array([y1 + y2 - ell, c1 - y1, c2 - y2])
+    print('Excess demand:', excess_demand)
+
+    markets_clear = np.isclose(ell - l1 - l2, 0, atol=1e-6) and np.isclose(y1 - c1, 0, atol=1e-6) and np.isclose(y2 - c2, 0, atol=1e-6)
+
+    if markets_clear == False:
+        print('Markets does not clear')
+        return None
+    
+    return ell, c1, c2
+
 
 
 

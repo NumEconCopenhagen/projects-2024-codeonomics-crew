@@ -4,6 +4,7 @@ import scipy
 
 from Funcs import *
 
+
 class production_economy:
     def __init__(self):
         '''Initialize the model'''
