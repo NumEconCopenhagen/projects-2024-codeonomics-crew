@@ -57,12 +57,14 @@ class production_economy:
         y1 = production(self.par, p1)
         y2 = production(self.par, p2)
 
-        # Total demand for labor supply
+        # Labor supply
         ell = l1+l2
 
         # Household consumption
-        c1 = demand(self.par, ell, p1, p2)[0]
-        c2 = demand(self.par, ell, p1, p2)[1]
+        c1, c2 = demand(self.par, p1, p2, self.par.tau, self.par.T)
+
+        excess_demand = np.array([y1 + y2 - ell, c1 - y1, c2 - y2])
+        print('Excess demand:', excess_demand)
 
         markets_clear = np.isclose(ell - l1 - l2, 0, atol=1e-6) and np.isclose(y1 - c1, 0, atol=1e-6) and np.isclose(y2 - c2, 0, atol=1e-6)
 
