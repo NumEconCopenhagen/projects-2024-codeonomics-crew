@@ -2,8 +2,7 @@ from types import SimpleNamespace
 import numpy as np
 import scipy
 
-from Funcs import *
-
+from Funcs import labor_demand, production, demand
 
 class production_economy:
     def __init__(self):
@@ -39,6 +38,7 @@ class production_economy:
         par.p2 = 2.0
 
     def market_clearing(self, p1, p2):
+
         '''Market clearing
         
         Args:
