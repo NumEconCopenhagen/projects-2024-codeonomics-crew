@@ -1,9 +1,9 @@
 import numpy as np
 import scipy
+from Model import *
 
 
-
-
+# Firms
 def labor_demand(par, p):
     '''Labor demand
     
@@ -35,7 +35,56 @@ def profit(par, p):
     '''
     return (1-par.gamma)/par.gamma*par.w*((p*par.A*par.gamma)/par.w)**(1/(1-par.gamma))
 
-def utility(par):
+# Households
+def utility(c1, c2, l, par):
+    '''Utility
+    
+    Args:
+        l: Labor
+        p1: price of good 1
+        p2: price of good 2
+    Returns:
+        Utility
+    '''
+
+    return np.log(c1**par.alpha*c2**(1-par.alpha))-par.nu*(l**(1+par.epsilon))/(1+par.epsilon)
+
+def labor_supply(par, p1, p2, tau, T):
+    '''Labor supply
+    
+    Args:
+        p1: price of good 1
+        p2: price of good 2
+    Returns:
+        Labor supply
+    '''
+
+    def objective_function(l):
+        c1 = par.alpha*(par.w*l+ T + profit(par, p1)+profit(par, p2))/p1
+        c2 = (1-par.alpha)*(par.w*l+ T + profit(par, p1)+profit(par, p2))/(p2+tau)
+        obj = utility(c1, c2, l, par)
+        return -obj
+    
+    # Perform optimization
+    initial_guess = 0.5
+    l = scipy.optimize.minimize(objective_function, initial_guess).x
+
+    return l.item()
+
+def demand(par, p1, p2, tau, T):
+    '''Demand
+    
+    Args:
+        l: Labor
+    Returns:
+        Demand
+    '''
+    c1 = par.alpha*(par.w*labor_supply(par,p1,p2,tau,T)+T+profit(par, p1)+profit(par, p2))/p1
+    c2 = (1-par.alpha)*(par.w*labor_supply(par,p1,p2,tau,T)+T+profit(par, p1)+profit(par, p2))/(p2+tau)
+
+    return c1, c2
+
+def utility_SWF(par, tau, T, p1, p2):
     '''Utility
     
     Args:
@@ -46,46 +95,12 @@ def utility(par):
     Returns:
         Utility
     '''
+    l = labor_supply(par, p1, p2, tau, T)
+    c1, c2 = demand(par, p1, p2, tau, T)
 
-    c1, c2 = demand(par, labor_demand(par, p1, p2), p1, p2)
-    p1 = par.p1
-    p2 = par.p2
+    return np.log(c1**par.alpha*c2**(1-par.alpha))-par.nu*(l**(1+par.epsilon))/(1+par.epsilon)
 
-    return np.log(c1**par.alpha*c2**(1-par.alpha))-par.nu*(labor_demand(par, p1, p2)**(1+par.epsilon))/(1+par.epsilon)
-
-def demand(par, l, p1, p2, tau):
-    '''Demand
-    
-    Args:
-        l: Labor
-    Returns:
-        Demand
-    '''
-    c1 = par.alpha*(par.w*l+par.T+profit(par, p1)+profit(par, p2))/p1
-    c2 = (1-par.alpha)*(par.w*l+par.T+profit(par, p1)+profit(par, p2))/(p2+par.tau)
-
-    return c1, c2
-
-def labor_supply(par, p1, p2):
-    '''Labor supply
-    
-    Args:
-        p1: price of good 1
-        p2: price of good 2
-    Returns:
-        Labor supply
-    '''
-    def objective_function(par, l, p1, p2):
-        obj = np.log(demand(par, l, p1, p2)[0])**par.alpha*(demand(par, l, p1, p2)[1])**(1-par.alpha)-par.nu*(l**(1+par.epsilon))/(1+par.epsilon)
-        return -obj
-    
-    # Perform optimization
-    initial_guess = 0.5
-    l = scipy.optimize.minimize_scalar(objective_function, args=(par, p1, p2), bounds=[0, 1], method='bounded').x
-
-    return l
-
-def SWF(par):
+def SWF(tau, T, p1, p2, par):
     '''Social welfare function
     
     Args:
@@ -94,17 +109,10 @@ def SWF(par):
     Returns:
         Social welfare function
     '''
-    p1 = par.p1
-    p2 = par.p2
 
-    return -(utility(par, p1, p2) - par.kappa*production(par, p2))
+    return utility_SWF(par, tau, T, p1, p2) - par.kappa*production(par, p2)
 
-from Model import production_economy
-model = production_economy()
-model.setup()
-par = model.par
-
-def Walras_law(prices):
+def Walras_law(prices, tau, T, par):
     '''Use Walras law to get market clearing
     
     Args:
@@ -123,18 +131,20 @@ def Walras_law(prices):
     y1 = production(par, p1)
     y2 = production(par, p2)
 
-    # Total demand for labor supply
-    ell = l1+l2
+    # Labor supply
+    ell = labor_supply(par, p1, p2, tau, T)
 
     # Household consumption
-    c1, c2 = demand(par, ell, p1, p2)
+    c1 , c2 = demand(par, p1, p2, tau, T)
+    if c1 < 0 or c2 < 0:
+        return np.inf, np.inf
 
     # Market clearings
     labor_market_clear = ell - l1 - l2
     good1_market_clear = y1 - c1
     good2_market_clear = y2 - c2
 
-    return labor_market_clear, good1_market_clear
+    return good2_market_clear, labor_market_clear
 
 
 
