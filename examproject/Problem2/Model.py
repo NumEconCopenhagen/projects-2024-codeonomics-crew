@@ -5,7 +5,7 @@ import scipy
 from Funcs import *
 
 
-class career_choice:
+class graduate_model:
     def __init__(self):
         '''Initialize the model'''
         self.par = SimpleNamespace()
